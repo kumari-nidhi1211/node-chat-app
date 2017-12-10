@@ -3,6 +3,7 @@ const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
 
+const {generateMessage} = require('./utils/message');
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
 var app = express();
@@ -13,13 +14,14 @@ app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
   console.log('new user connected');
-  socket.emit('newMessage', {
-    from: 'nidhi',
-    text: "Hey, What's up",
-    createdAt: 123,
-  });
+  socket.emit('newMessage', generateMessage('Nidhi', 'Welcome to chat app'));
   socket.on('createMessage', (newMessage) => {
     console.log('createMessage', newMessage);
+    socket.broadcast.emit('newMessage', {
+      from: newMessage.from,
+      text: newMessage.text,
+      createdAt: new Date().getTime()
+    });
   });
   socket.on('disconnect', () => {
     console.log('user as disconnect');
